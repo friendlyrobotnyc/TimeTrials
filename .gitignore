@@ -5,6 +5,9 @@
 # Files for the ART/Dalvik VM
 *.dex
 
+# MacOS
+*.DS_Store
+
 # Java class files
 *.class
 
@@ -34,6 +37,7 @@ captures/
 
 # IntelliJ
 *.iml
+.idea/
 .idea/workspace.xml
 .idea/tasks.xml
 .idea/gradle.xml
