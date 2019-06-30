@@ -2,6 +2,7 @@ package friendlyrobot.nyc.timetrials
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,9 +33,23 @@ class MainActivity : AppCompatActivity() {
             }
         }
         bookAdapter.notifyDataSetChanged()
+
+        searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                Log.e("MainActivity", "onQueryTextSubmit $query")
+                bookAdapter.clear()
+                indeterminateBar.visibility = View.VISIBLE
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+
+        })
     }
 }
-
 
 class BookAdapter : RecyclerView.Adapter<BookAdapter.BookViewHolder>() {
 
@@ -60,6 +75,17 @@ class BookAdapter : RecyclerView.Adapter<BookAdapter.BookViewHolder>() {
 
     fun add(book: Book) {
         books.add(book)
+    }
+
+    fun addAllAndClear(booksToAdd: List<Book>) {
+        books.clear()
+        books.addAll(booksToAdd)
+        notifyDataSetChanged()
+    }
+
+    fun clear() {
+        books.clear()
+        notifyDataSetChanged()
     }
 }
 
