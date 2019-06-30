@@ -7,7 +7,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    
+
     defaultConfig {
         applicationId "friendlyrobot.nyc.timetrials"
         minSdkVersion versions.minSdk
