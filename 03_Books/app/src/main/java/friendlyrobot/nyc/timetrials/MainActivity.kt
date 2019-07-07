@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        setSupportActionBar(null)
+        setSupportActionBar(toolbar)
 
         searchResponseAdapter = SearchResponseAdapter()
         booksRV.layoutManager = LinearLayoutManager(this)
