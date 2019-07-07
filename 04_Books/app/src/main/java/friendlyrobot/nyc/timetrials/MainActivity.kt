@@ -43,7 +43,9 @@ class MainActivity : AppCompatActivity() {
                             response: Response<SearchResponse>
                         ) {
                             response?.body()?.let {
-                                searchResponseAdapter.add(it?.docs?.toList())
+                                val books = mutableListOf<Book>()
+                                it?.docs?.forEach { books.add(it.toBook()) }
+                                searchResponseAdapter.add(books)
                                 Log.e("onResponse retrofit", "response: ${it?.numFound}")
                             }
                         }
@@ -64,7 +66,7 @@ class MainActivity : AppCompatActivity() {
 
 class SearchResponseAdapter : RecyclerView.Adapter<SearchItem>() {
 
-    private val books = mutableListOf<BookDocument>()
+    private val books = mutableListOf<Book>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchItem {
         val inflater = LayoutInflater.from(parent.context)
@@ -77,16 +79,17 @@ class SearchResponseAdapter : RecyclerView.Adapter<SearchItem>() {
         books?.getOrNull(position)?.let { holder.bind(it) }
     }
 
-    fun add(bookDocument: List<BookDocument>) {
+    fun add(book: List<Book>) {
         books.clear()
-        books.addAll(bookDocument)
+        books.addAll(book)
+        Log.e("SearchResponseAdapter", "books.size ${books.size}")
         notifyDataSetChanged()
     }
 }
 
 class SearchItem(searchItem: View) : RecyclerView.ViewHolder(searchItem) {
 
-    fun bind(bookDocument: BookDocument) {
-        itemView.titleText.text = bookDocument.title_suggest
+    fun bind(book: Book) {
+        itemView.titleText.text = book.title
     }
 }
