@@ -1,0 +1,47 @@
+apply plugin: 'com.android.application'
+
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-android-extensions'
+
+apply plugin: 'kotlin-kapt'
+
+android {
+
+    defaultConfig {
+        applicationId "friendlyrobot.nyc.timetrials"
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.targetSdk
+        compileSdkVersion versions.compileSdk
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    testImplementation testDependencies.junit
+    testImplementation testDependencies.mockk
+
+    androidTestImplementation testDependencies.junitKtx
+    androidTestImplementation testDependencies.espresso
+
+    implementation androidDependencies.kotlin
+    implementation androidDependencies.appCompat
+    implementation androidDependencies.ktxCore
+    implementation androidDependencies.appCompat
+    implementation androidDependencies.materialComponents
+    implementation androidDependencies.constraintLayout
+    implementation androidDependencies.recyclerView
+
+    implementation libraryDependencies.moshi
+
+    //kapt
+    kapt(libraryDependencies.moshiCodegen)
+}
