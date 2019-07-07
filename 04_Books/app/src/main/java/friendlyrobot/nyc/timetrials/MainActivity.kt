@@ -30,6 +30,7 @@ class MainActivity : AppCompatActivity() {
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
             override fun onQueryTextSubmit(query: String?): Boolean {
 
+                showLoading()
                 query?.let {
 
                     val call = buildBooksApi().search(it)
@@ -47,6 +48,7 @@ class MainActivity : AppCompatActivity() {
                                 it?.docs?.forEach { books.add(it.toBook()) }
                                 searchResponseAdapter.add(books)
                                 Log.e("onResponse retrofit", "response: ${it?.numFound}")
+                                hideLoading()
                             }
                         }
 
@@ -61,6 +63,16 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
+    }
+
+    fun showLoading() {
+        recyclerView.visibility = View.GONE
+        indeterminateBar.visibility = View.VISIBLE
+    }
+
+    fun hideLoading() {
+        recyclerView.visibility = View.VISIBLE
+        indeterminateBar.visibility = View.GONE
     }
 }
 
