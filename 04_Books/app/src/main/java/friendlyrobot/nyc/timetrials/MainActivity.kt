@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.moshi.Moshi
@@ -26,6 +27,22 @@ class MainActivity : AppCompatActivity() {
         val moshi = Moshi.Builder().build()
         val searchSample = moshi.adapter(SearchResponse::class.java).fromJson(SAMPLE_DATA)
         searchResponseAdapter.add(searchSample!!.docs.toList())
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+            override fun onQueryTextSubmit(query: String?): Boolean {
+
+                val sampleTwo = moshi.adapter(SearchResponse::class.java).fromJson(SAMPLE_DATA2)
+                searchResponseAdapter.add(sampleTwo!!.docs.toList())
+
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+
+                return false
+            }
+
+        })
     }
 }
 
