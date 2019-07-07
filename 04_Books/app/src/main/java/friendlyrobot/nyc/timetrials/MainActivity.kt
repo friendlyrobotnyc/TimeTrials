@@ -2,15 +2,18 @@ package friendlyrobot.nyc.timetrials
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.squareup.moshi.Moshi
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_search.view.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,16 +27,29 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = searchResponseAdapter
 
-        val moshi = Moshi.Builder().build()
-        val searchSample = moshi.adapter(SearchResponse::class.java).fromJson(SAMPLE_DATA)
-        searchResponseAdapter.add(searchSample!!.docs.toList())
-
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
             override fun onQueryTextSubmit(query: String?): Boolean {
 
-                val sampleTwo = moshi.adapter(SearchResponse::class.java).fromJson(SAMPLE_DATA2)
-                searchResponseAdapter.add(sampleTwo!!.docs.toList())
+                query?.let {
 
+                    val call = buildBooksApi().search(it)
+                    call.enqueue(object : Callback<SearchResponse>{
+                        override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
+                            Log.e("Failure retrofit", "error: ${t.localizedMessage}", t)
+                        }
+
+                        override fun onResponse(
+                            call: Call<SearchResponse>,
+                            response: Response<SearchResponse>
+                        ) {
+                            response?.body()?.let {
+                                searchResponseAdapter.add(it?.docs?.toList())
+                                Log.e("onResponse retrofit", "response: ${it?.numFound}")
+                            }
+                        }
+
+                    })
+                }
                 return false
             }
 
@@ -45,7 +61,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 }
-
 
 class SearchResponseAdapter : RecyclerView.Adapter<SearchItem>() {
 
@@ -67,7 +82,6 @@ class SearchResponseAdapter : RecyclerView.Adapter<SearchItem>() {
         books.addAll(bookDocument)
         notifyDataSetChanged()
     }
-
 }
 
 class SearchItem(searchItem: View) : RecyclerView.ViewHolder(searchItem) {
