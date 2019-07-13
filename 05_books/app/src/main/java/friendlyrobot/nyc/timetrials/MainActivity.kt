@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_book.view.*
@@ -21,6 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     protected lateinit var bookAdapter: BookAdapter
     protected lateinit var recyclerView: RecyclerView
+    protected lateinit var searchView: SearchView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,24 +30,40 @@ class MainActivity : AppCompatActivity() {
 
         (applicationContext as TimeTrialApplication).component.inject(this)
 
+        searchView = findViewById(R.id.searchView)
+        searchView.isIconified = false
         bookAdapter = BookAdapter()
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = bookAdapter
 
-        bookService.bookSearch("heinlein")
-            .enqueue(object : Callback<BookResponse> {
-            override fun onFailure(call: Call<BookResponse>, t: Throwable) {
-                Log.e("ERROR", "EXCEP: ${t.localizedMessage}")
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                query?.let { queryBookService(it) }
+                return false
             }
 
-            override fun onResponse(call: Call<BookResponse>, response: Response<BookResponse>) {
-                Log.e("Success", "response: numFOund: ${response.body()?.numFound}")
-                response.body()?.docs?.map { it.toBook() }?.toList()?.let {
-                    bookAdapter.add(it)
-                }
+            override fun onQueryTextChange(newText: String?): Boolean {
+
+                return false
             }
         })
+    }
+
+    fun queryBookService(searchValue :String) {
+        bookService.bookSearch(searchValue)
+            .enqueue(object : Callback<BookResponse> {
+                override fun onFailure(call: Call<BookResponse>, t: Throwable) {
+                    Log.e("ERROR", "EXCEP: ${t.localizedMessage}")
+                }
+
+                override fun onResponse(call: Call<BookResponse>, response: Response<BookResponse>) {
+                    Log.e("Success", "response: numFOund: ${response.body()?.numFound}")
+                    response.body()?.docs?.map { it.toBook() }?.toList()?.let {
+                        bookAdapter.add(it)
+                    }
+                }
+            })
     }
 }
 
