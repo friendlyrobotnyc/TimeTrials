@@ -6,9 +6,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.squareup.moshi.Moshi
 import kotlinx.android.synthetic.main.item_book.view.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -20,38 +20,58 @@ class MainActivity : AppCompatActivity() {
 
     private val bookAdapter: BookAdapter = BookAdapter()
     protected lateinit var recyclerView: RecyclerView
+    protected lateinit var searchView: SearchView
+
+    private val retrofit = Retrofit.Builder()
+        .addConverterFactory(MoshiConverterFactory.create())
+        .baseUrl("https://openlibrary.org/")
+        .build()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        searchView = findViewById(R.id.searchView)
+        searchView.isIconified = false
+        searchView.callOnClick()
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+
+            override fun onQueryTextSubmit(query: String?): Boolean {
+
+                val bookService = retrofit.create(BookService::class.java)
+
+                bookService.search("wells").enqueue(
+                    object : Callback<BookResponse> {
+                        override fun onFailure(call: Call<BookResponse>, t: Throwable) {
+                            Log.e("Error", "Failure: ${t.localizedMessage}", t)
+                        }
+
+                        override fun onResponse(
+                            call: Call<BookResponse>,
+                            response: Response<BookResponse>
+                        ) {
+                            Log.e("onResponse", "NumFount: ${response.body()?.numFound}")
+                            response.body()?.docs?.map { it.toBook() }?.toList()?.let { bookAdapter.add(it) }
+                        }
+
+                    }
+                )
+
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+
+        })
+
         recyclerView = findViewById(R.id.recyclerView)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = bookAdapter
 
-        val retrofit = Retrofit.Builder()
-            .addConverterFactory(MoshiConverterFactory.create())
-            .baseUrl("https://openlibrary.org/")
-            .build()
 
-        val bookService = retrofit.create(BookService::class.java)
-
-        bookService.search("wells").enqueue(
-            object : Callback<BookResponse> {
-                override fun onFailure(call: Call<BookResponse>, t: Throwable) {
-                    Log.e("Error", "Failure: ${t.localizedMessage}", t)
-                }
-
-                override fun onResponse(
-                    call: Call<BookResponse>,
-                    response: Response<BookResponse>
-                ) {
-                    Log.e("onResponse", "NumFount: ${response.body()?.numFound}")
-                    response.body()?.docs?.map { it.toBook() }?.toList()?.let { bookAdapter.add(it) }
-                }
-
-            }
-        )
     }
 }
 
